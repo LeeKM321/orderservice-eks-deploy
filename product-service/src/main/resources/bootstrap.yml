@@ -1,0 +1,8 @@
+
+spring:
+  application:
+    name: product-service # 서비스 이름과 매칭되는 설정 파일 (product-service.yml)을 지정
+  cloud:
+    config:
+      uri: http://config-service:8888
+      profile: default

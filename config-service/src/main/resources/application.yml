@@ -1,0 +1,22 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+#        native:
+#          search-locations: file:///Users/stephen/Desktop/develop/git-local-repo
+        git:
+          # 호스트 키는 SSH 프로토콜을 통해 Git 저장소에 접근할 때 Git 서버의 신뢰성을 검증하기 위한
+          # 호스트 키를 제공해야 합니다.
+          uri: https://github.com/LeeKM321/cloud-config-settings.git
+          default-label: main
+          username: LeeKM321
+          password: ${GIT_PRIVATE_KEY}
+
+logging:
+  level:
+    org.springframework.cloud.config: debug

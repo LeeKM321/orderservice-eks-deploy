@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod # ClusterIssuer 참조
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.playdatashop8917.shop
+      secretName: api-playdatashop-tls # cert-manager가 생성한 인증서 정보를 끌고와서 활용.
+  rules:
+    - host: api.playdatashop8917.shop
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service # 모든 요청은 gateway를 통해 간다.
+                port:
+                  number: 8000

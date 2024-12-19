@@ -1,0 +1,16 @@
+server:
+  port: 8081
+
+jasypt:
+  encryptor:
+    bean: jasyptEncrypter
+
+spring:
+  application:
+    name: user-service
+
+
+temp:
+  message: hellojava!
+
+

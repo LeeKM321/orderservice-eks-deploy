@@ -1,0 +1,87 @@
+
+server:
+  port: 8000
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          "[/**]": # 모든 경로에 대한 CORS 설정
+            allowed-origins:
+              - "https://playdatashop8917.shop"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - "Content-Type"
+              - "Authorization"
+              - "X-Requested-With"
+            allow-credentials: true
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: merong
+            preLogger: true
+            postLogger: true
+        - name: DedupeResponseHeader
+          args:
+            name: Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            strategy: RETAIN_FIRST
+      routes:
+        - id: user-service
+          # k8s 클러스터 내에서 특정 서비스가 다른 서비스와 통신하기 위해 사용하는 내부 DNS 주소.
+          # http://서비스이름.네임스페이스.svc.cluster.local(내부 도메인):포트번호
+          uri: http://user-service.default.svc.cluster.local:8081
+          predicates:
+            - Path=/user-service/doLogin
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: http://user-service.default.svc.cluster.local:8081
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET, POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: http://user-service.default.svc.cluster.local:8081
+          predicates:
+            - Path=/user-service/**
+          filters:
+            # 요청이 서비스로 전달되기 전 헤더에서 제거하고자 하는 값이 있을 때 사용하는 필터
+            - RemoveRequestHeader=Cookie
+            # 요청 경로를 특정 패턴에 따라 새로운 경로로 변환 -> 정규표현식 사용 가능 (자유도 높음)
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+#            - StripPrefix=1 -> 첫번째 접두어를 제거
+            - AuthorizationHeaderFilter
+
+        - id: product-service
+          uri: http://product-service.default.svc.cluster.local:8083
+          predicates:
+            - Path=/product-service/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/product-service/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+
+        - id: ordering-service
+          uri: http://ordering-service.default.svc.cluster.local:8082
+          predicates:
+            - Path=/ordering-service/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/ordering-service/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+
+

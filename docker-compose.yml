@@ -1,0 +1,120 @@
+version: '3.8'
+services:
+  config-service:
+    image: 872651651829.dkr.ecr.ap-northeast-2.amazonaws.com/config-service:latest # ECR에 push한 이미지 이름
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://3.35.23.227:8888/actuator/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - msa-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: always
+
+  discovery-service:
+    image: 872651651829.dkr.ecr.ap-northeast-2.amazonaws.com/discoveryservice:latest # ECR에 push한 이미지 이름
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://3.35.23.227:8761"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: always
+
+  gateway-service:
+    image: 872651651829.dkr.ecr.ap-northeast-2.amazonaws.com/gateway-service:latest # ECR에 push한 이미지 이름
+    container_name: gateway-service
+    ports:
+      - "8000:8000"
+    networks:
+      - msa-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  user-service:
+    image: 872651651829.dkr.ecr.ap-northeast-2.amazonaws.com/user-service:latest # ECR에 push한 이미지 이름
+    container_name: user-service
+    networks:
+      - msa-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  order-service:
+    image: 872651651829.dkr.ecr.ap-northeast-2.amazonaws.com/ordering-service:latest # ECR에 push한 이미지 이름
+    container_name: order-service
+    networks:
+      - msa-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  product-service:
+    image: 872651651829.dkr.ecr.ap-northeast-2.amazonaws.com/product-service:latest # ECR에 push한 이미지 이름
+    container_name: product-service
+    networks:
+      - msa-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    networks:
+      - msa-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # AMQP 포트
+      - "15672:15672" # 관리 UI 포트
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - msa-network
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
+
+networks:
+  msa-network:
+    driver: bridge # Docker의 기본 네트워크 드라이버. 동일한 호스트 내에서 통신할 수 있도록 설정.
+
+
+
+
+

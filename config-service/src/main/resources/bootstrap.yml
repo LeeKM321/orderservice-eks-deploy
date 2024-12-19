@@ -1,0 +1,15 @@
+encrypt:
+#  key: abcdefghijk123456789222abcdzzz
+  key-store:
+    location: file:///Users/stephen/keystore/apiEncryptionKey.jks
+    password: abc1234
+    alias: apiEncryptionKey
+
+spring:
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+  cloud:
+    config:
+      uri: http://config-service:8888
+      profile: default
