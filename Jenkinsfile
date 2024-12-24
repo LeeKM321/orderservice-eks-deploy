@@ -118,7 +118,6 @@ pipeline {
                                 cd ..
                                 ls -a
                                 git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git
-                                cd orderservice-kubenetes
                             '''
 
                             def changedServices = env.CHANGED_SERVICES.split(",")
@@ -130,7 +129,7 @@ pipeline {
                                 // s#^ -> 라인의 시작을 의미. image: -> 텍스트 image:을 찾아라, .* -> image: 다음에 오는 모든 문자
                                 // 새로운 태그를 붙인 ecr 경로로 수정을 진행해라
                                 sh """
-                                    pwd
+                                    cd /var/jenkins_home/workspace/orderservice-kubenetes
                                     ls -a
                                     echo "Updating ${service} image tag in k8s repo...."
                                     sed -i 's#^image: .*#image: ${ECR_URL}/${service}:${newTag}#' ./umbrella-chart/charts/${service}/values.yaml

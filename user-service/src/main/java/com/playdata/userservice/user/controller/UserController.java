@@ -179,7 +179,7 @@ public class UserController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "hello from user service, k8s deploy complete! - 16";
+        return "hello from user service, k8s deploy complete! - 17";
     }
 
 
