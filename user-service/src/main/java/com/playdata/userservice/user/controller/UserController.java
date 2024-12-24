@@ -175,7 +175,11 @@ public class UserController {
                 + ", gateway ip=" + env.getProperty("gateway.ip")
                 + ", token secret=" + env.getProperty("token.secret")
                 + ", token expiration time=" + env.getProperty("token.expiration_time"));
+    }
 
+    @GetMapping("/hello")
+    public String hello() {
+        return "hello from user service, k8s deploy complete!";
     }
 
 
