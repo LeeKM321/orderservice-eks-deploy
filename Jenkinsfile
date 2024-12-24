@@ -111,27 +111,34 @@ pipeline {
                     // git 스텝: 지정된 브랜치, 자격 증명, url을 사용하여 클론할 수 있게 해주는 문법.
                     //git branch: 'main',
                       //  credentialsId: "${K8S_REPO_CRED}",
-                        //url: "${K8S_REPO_URL}"
+                      //url: "${K8S_REPO_URL}"
                     withCredentials([usernamePassword(credentialsId: "${K8S_REPO_CRED}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        dir('k8s-repo') {
+                            // 기존에 클론된 레포지토리가 있다면 pull, 없으면 clone
+                            sh '''
+                                if [ -d ".git" ]; then
+                                    echo "k8s-repo already cloned. Pulling latest changes..."
+                                    git pull origin main
+                                else
+                                    echo "Cloning k8s-repo..."
+                                    git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git .
+                                fi
+                            '''
 
-                        def changedServices = env.CHANGED_SERVICES.split(",")
-                        // Git 원격 URL에 PAT 포함시켜 설정
-                        sh """
-                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git .
-                        """
-                        changedServices.each { service ->
-                            def newTag = "1.0.1" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
+                            def changedServices = env.CHANGED_SERVICES.split(",")
+                            changedServices.each { service ->
+                                def newTag = "1.0.1" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
 
-                            // umbrella-chart/charts/<service>/values.yaml 파일 내의 image 태그 교체.
-                            // sed: 스트림 편집기(stream editor), 텍스트 파일을 수정하는 데 사용.
-                            // s#^ -> 라인의 시작을 의미. image: -> 텍스트 image:을 찾아라, .* -> image: 다음에 오는 모든 문자
-                            // 새로운 태그를 붙인 ecr 경로로 수정을 진행해라
-                            sh """
-                                echo "Updating ${service} image tag in k8s repo..."
-                                sed -i 's#^image: .*#image: ${ECR_URL}/${service}:${newTag}#' umbrella-chart/charts/${service}/values.yaml
-                            """
+                                // umbrella-chart/charts/<service>/values.yaml 파일 내의 image 태그 교체.
+                                // sed: 스트림 편집기(stream editor), 텍스트 파일을 수정하는 데 사용.
+                                // s#^ -> 라인의 시작을 의미. image: -> 텍스트 image:을 찾아라, .* -> image: 다음에 오는 모든 문자
+                                // 새로운 태그를 붙인 ecr 경로로 수정을 진행해라
+                                sh """
+                                    echo "Updating ${service} image tag in k8s repo..."
+                                    sed -i 's#^image: .*#image: ${ECR_URL}/${service}:${newTag}#' umbrella-chart/charts/${service}/values.yaml
+                                """
+                            }
                         }
-
 
 
                         // 변경사항 commit & push
