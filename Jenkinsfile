@@ -113,16 +113,11 @@ pipeline {
                       //  credentialsId: "${K8S_REPO_CRED}",
                       //url: "${K8S_REPO_URL}"
                     withCredentials([usernamePassword(credentialsId: "${K8S_REPO_CRED}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                        dir('k8s-repo') {
                             // 기존에 클론된 레포지토리가 있다면 pull, 없으면 clone
                             sh '''
-                                if [ -d ".git" ]; then
-                                    echo "k8s-repo already cloned. Pulling latest changes..."
-                                    git pull origin main
-                                else
-                                    echo "Cloning k8s-repo..."
-                                    git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git .
-                                fi
+                                cd ..
+                                ls -a
+                                git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git
                             '''
 
                             def changedServices = env.CHANGED_SERVICES.split(",")
@@ -138,7 +133,6 @@ pipeline {
                                     sed -i 's#^image: .*#image: ${ECR_URL}/${service}:${newTag}#' umbrella-chart/charts/${service}/values.yaml
                                 """
                             }
-                        }
 
 
                         // 변경사항 commit & push
@@ -149,6 +143,10 @@ pipeline {
                             git add .
                             git commit -m "Update images for changed services"
                             git push origin main
+
+                            echo "push complete."
+                            cd ..
+                            rm -rf orderservice-kubenetes
                         """
 
                     }
