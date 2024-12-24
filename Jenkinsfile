@@ -131,7 +131,7 @@ pipeline {
                                 // 새로운 태그를 붙인 ecr 경로로 수정을 진행해라
                                 sh """
                                     echo "Updating ${service} image tag in k8s repo..."
-                                    sed -i 's#^image: .*#image: ${ECR_URL}/${service}:${newTag}#' umbrella-chart/charts/${service}/values.yaml
+                                    sed -i 's#^image: .*#image: ${ECR_URL}/${service}:${newTag}#' ./umbrella-chart/charts/${service}/values.yaml
                                 """
                             }
 
