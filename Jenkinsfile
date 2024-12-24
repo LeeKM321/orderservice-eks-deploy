@@ -82,7 +82,7 @@ pipeline {
                         def changedServices = env.CHANGED_SERVICES.split(",")
                         changedServices.each { service ->
                             // 여기서 원하는 버전을 정하거나, 커밋 태그를 붙여보자.
-                            def newTag = "1.0.1"
+                            def newTag = "1.0.2"
                             sh """
                             curl -O https://amazon-ecr-credential-helper-releases.s3.us-east-2.amazonaws.com/0.4.0/linux-amd64/${ecrLoginHelper}
                             chmod +x ${ecrLoginHelper}
@@ -122,7 +122,7 @@ pipeline {
 
                             def changedServices = env.CHANGED_SERVICES.split(",")
                             changedServices.each { service ->
-                                def newTag = "1.0.1" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
+                                def newTag = "1.0.2" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
 
                                 // umbrella-chart/charts/<service>/values.yaml 파일 내의 image 태그 교체.
                                 // sed: 스트림 편집기(stream editor), 텍스트 파일을 수정하는 데 사용.
