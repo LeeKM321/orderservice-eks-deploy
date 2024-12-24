@@ -118,6 +118,7 @@ pipeline {
                                 cd ..
                                 ls -a
                                 git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git
+                                cd orderservice-kubenetes
                             '''
 
                             def changedServices = env.CHANGED_SERVICES.split(",")
