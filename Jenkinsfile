@@ -110,7 +110,7 @@ pipeline {
                     // 1. k8s 레포지토리를 클론하자.
                     // git 스텝: 지정된 브랜치, 자격 증명, url을 사용하여 클론할 수 있게 해주는 문법.
                     git branch: 'main',
-                    credentialId: "${K8S_REPO_CRED}",
+                    credentialsId: "${K8S_REPO_CRED}",
                     url: "${K8S_REPO_URL}"
 
                     def changedServices = env.CHANGED_SERVICES.split(",")
