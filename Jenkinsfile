@@ -144,7 +144,7 @@ pipeline {
                             git config user.email "stephen4951@gmail.com"
                             git remote -v
                             git add .
-                            git commit -m "Update images for changed services"
+                            git commit -m "Update images for changed services ${env.BUILD_ID}"
                             git push origin main
 
                             echo "push complete."
