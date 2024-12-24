@@ -115,6 +115,10 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: "${K8S_REPO_CRED}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 
                         def changedServices = env.CHANGED_SERVICES.split(",")
+                        // Git 원격 URL에 PAT 포함시켜 설정
+                        sh """
+                            git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git
+                        """
                         changedServices.each { service ->
                             def newTag = "1.0.1" // 이미지 빌드할 때 사용한 태그를 동일하게 사용.
 
@@ -128,10 +132,7 @@ pipeline {
                             """
                         }
 
-                        // Git 원격 URL에 PAT 포함시켜 설정
-                        sh """
-                            git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/LeeKM321/orderservice-kubenetes.git
-                        """
+
 
                         // 변경사항 commit & push
                         sh """
