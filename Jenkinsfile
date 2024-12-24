@@ -139,6 +139,7 @@ pipeline {
 
                         // 변경사항 commit & push
                         sh """
+                            cd /var/jenkins_home/workspace/orderservice-kubenetes
                             git config user.name "stephen Lee"
                             git config user.email "stephen4951@gmail.com"
                             git remote -v
