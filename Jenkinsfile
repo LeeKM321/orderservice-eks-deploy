@@ -148,6 +148,7 @@ pipeline {
                             echo "push complete."
                             cd ..
                             rm -rf orderservice-kubenetes
+                            ls -a
                         """
 
                     }
